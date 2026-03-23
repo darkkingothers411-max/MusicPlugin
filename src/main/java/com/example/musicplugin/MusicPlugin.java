@@ -57,6 +57,8 @@ public class MusicPlugin extends JavaPlugin {
             return true;
         }
 
+        String name = player.getName();
+
         switch (cmd.getName().toLowerCase()) {
 
             case "playsong" -> {
@@ -74,20 +76,27 @@ public class MusicPlugin extends JavaPlugin {
                     return true;
                 }
 
-                getServer().dispatchCommand(getServer().getConsoleSender(),
-                    "stopsound " + player.getName() + " music *");
+                // Stop current music first
+                getServer().dispatchCommand(
+                    getServer().getConsoleSender(),
+                    "stopsound " + name
+                );
 
-                getServer().dispatchCommand(getServer().getConsoleSender(),
-                    "playsound custom." + songName + " music " +
-                    player.getName() + " ~ ~ ~ 1 1");
+                // Play the song (works for Java and Bedrock via Geyser)
+                getServer().dispatchCommand(
+                    getServer().getConsoleSender(),
+                    "playsound custom." + songName + " music " + name
+                );
 
                 player.sendMessage("§aNow playing: §e" + songName);
                 player.sendMessage("§7Use §f/stopsong §7to stop.");
             }
 
             case "stopsong" -> {
-                getServer().dispatchCommand(getServer().getConsoleSender(),
-                    "stopsound " + player.getName() + " music *");
+                getServer().dispatchCommand(
+                    getServer().getConsoleSender(),
+                    "stopsound " + name
+                );
                 player.sendMessage("§cMusic stopped.");
             }
 
@@ -98,7 +107,7 @@ public class MusicPlugin extends JavaPlugin {
                 }
                 player.sendMessage("§6§l=========================");
                 player.sendMessage("§7Total: §f" + SONGS.size() + " songs");
-                player.sendMessage("§7Type: §f/playsong <name>");
+                player.sendMessage("§7Type: §f/playsong <songname>");
             }
         }
         return true;
