@@ -52,62 +52,63 @@ public class MusicPlugin extends JavaPlugin {
     public boolean onCommand(CommandSender sender, Command cmd,
                              String label, String[] args) {
 
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage("Only players can use this command!");
-            return true;
-        }
-
-        String name = player.getName();
-
         switch (cmd.getName().toLowerCase()) {
 
             case "playsong" -> {
                 if (args.length == 0) {
-                    player.sendMessage("§cUsage: §f/playsong <songname>");
-                    player.sendMessage("§7Use §f/songlist §7to see all songs.");
+                    sender.sendMessage("§cUsage: §f/playsong <songname>");
+                    sender.sendMessage("§7Use §f/songlist §7to see all songs.");
                     return true;
                 }
 
                 String songName = args[0].toLowerCase();
 
                 if (!SONGS.contains(songName)) {
-                    player.sendMessage("§cSong not found: §e" + songName);
-                    player.sendMessage("§7Use §f/songlist §7to see available songs.");
+                    sender.sendMessage("§cSong not found: §e" + songName);
+                    sender.sendMessage("§7Use §f/songlist §7to see available songs.");
                     return true;
                 }
 
-                // Stop current music first
-                getServer().dispatchCommand(
-                    getServer().getConsoleSender(),
-                    "stopsound " + name
-                );
+                // Play for ALL online players anywhere on the map
+                for (Player p : getServer().getOnlinePlayers()) {
+                    // Stop any current music first
+                    getServer().dispatchCommand(
+                        getServer().getConsoleSender(),
+                        "stopsound " + p.getName()
+                    );
+                    // Play at the player's own location so it works anywhere
+                    getServer().dispatchCommand(
+                        getServer().getConsoleSender(),
+                        "execute at " + p.getName() + " run playsound custom."
+                        + songName + " music " + p.getName() + " ~ ~ ~ 100 1"
+                    );
+                }
 
-                // Play the song (works for Java and Bedrock via Geyser)
-                getServer().dispatchCommand(
-                    getServer().getConsoleSender(),
-                    "playsound custom." + songName + " music " + name
-                );
-
-                player.sendMessage("§aNow playing: §e" + songName);
-                player.sendMessage("§7Use §f/stopsong §7to stop.");
+                // Broadcast message to all players
+                getServer().broadcastMessage("§6§l🎵 Now playing: §e" + songName
+                    + " §7(requested by §f" + sender.getName() + "§7)");
+                getServer().broadcastMessage("§7Type §f/stopsong §7to stop.");
             }
 
             case "stopsong" -> {
-                getServer().dispatchCommand(
-                    getServer().getConsoleSender(),
-                    "stopsound " + name
-                );
-                player.sendMessage("§cMusic stopped.");
+                // Stop music for ALL online players
+                for (Player p : getServer().getOnlinePlayers()) {
+                    getServer().dispatchCommand(
+                        getServer().getConsoleSender(),
+                        "stopsound " + p.getName()
+                    );
+                }
+                getServer().broadcastMessage("§c🔇 Music stopped by §f" + sender.getName());
             }
 
             case "songlist" -> {
-                player.sendMessage("§6§l======= Song List =======");
+                sender.sendMessage("§6§l======= Song List =======");
                 for (int i = 0; i < SONGS.size(); i++) {
-                    player.sendMessage("§7" + (i + 1) + ". §f" + SONGS.get(i));
+                    sender.sendMessage("§7" + (i + 1) + ". §f" + SONGS.get(i));
                 }
-                player.sendMessage("§6§l=========================");
-                player.sendMessage("§7Total: §f" + SONGS.size() + " songs");
-                player.sendMessage("§7Type: §f/playsong <songname>");
+                sender.sendMessage("§6§l=========================");
+                sender.sendMessage("§7Total: §f" + SONGS.size() + " songs");
+                sender.sendMessage("§7Type: §f/playsong <songname>");
             }
         }
         return true;
