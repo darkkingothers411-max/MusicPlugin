@@ -1,0 +1,16 @@
+name: MusicPlugin
+version: 3.0
+main: com.example.musicplugin.MusicPlugin
+api-version: 1.16
+description: Play 31 custom songs for Java and Bedrock players
+
+commands:
+  playsong:
+    description: Play a custom song for all players
+    usage: /playsong <songname>
+  stopsong:
+    description: Stop music for all players
+    usage: /stopsong
+  songlist:
+    description: List all available songs
+    usage: /songlist
